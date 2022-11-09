@@ -3,6 +3,11 @@ server:
 
 ---
 
+
+keycloak-client:
+  server-url: http://localhost:9090
+  realm: master
+
 spring:
   profiles: default
   cloud:
@@ -11,23 +16,23 @@ spring:
         - id: dashboard
           uri: http://localhost:8081
           predicates:
-            - Path=, /dashboards/**
+            - Path= /dashboards/**
         - id: drive
           uri: http://localhost:8082
           predicates:
-            - Path=/files/**, 
+            - Path=/files/** 
         - id: indexer
           uri: http://localhost:8083
           predicates:
-            - Path=/indices/**, 
+            - Path=/indices/** 
         - id: video processing
           uri: http://localhost:8084
           predicates:
-            - Path=/videos/**, 
+            - Path=/videos/** 
         - id: notification
           uri: http://localhost:8085
           predicates:
-            - Path=/notificationHistories/**, 
+            - Path=/notificationHistories/** 
         - id: frontend
           uri: http://localhost:8080
           predicates:
@@ -35,46 +40,75 @@ spring:
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins:
+            allowedOriginPatterns:
               - "*"
             allowedMethods:
               - "*"
             allowedHeaders:
               - "*"
             allowCredentials: true
-
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}
+            user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            client-id: "<client-id>"
+            client-secret: 
+            redirect-uri: "gateway-path/login/oauth2/code/client-name"
+            authorization-grant-type: authorization_code
+            scope: openid
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/certs
 
 ---
 
 spring:
   profiles: docker
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}
+            user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            client-id: "<client-id>"
+            client-secret: 
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+            authorization-grant-type: authorization_code
+            scope: openid
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/certs
   cloud:
     gateway:
       routes:
         - id: dashboard
           uri: http://dashboard:8080
           predicates:
-            - Path=, /dashboards/**
+            - Path= /dashboards/**
         - id: drive
           uri: http://drive:8080
           predicates:
-            - Path=/files/**, 
+            - Path=/files/** 
         - id: indexer
           uri: http://indexer:8080
           predicates:
-            - Path=/indices/**, 
+            - Path=/indices/** 
         - id: video processing
-          uri: http://videoProcessing:8080
+          uri: http://video processing:8080
           predicates:
-            - Path=/videos/**, 
+            - Path=/videos/** 
         - id: notification
           uri: http://notification:8080
           predicates:
-            - Path=/notificationHistories/**, 
-        - id: frontend
-          uri: http://frontend:8080
-          predicates:
-            - Path=/**
+            - Path=/notificationHistories/** 
       globalcors:
         corsConfigurations:
           '[/**]':

@@ -67,6 +67,27 @@ public class Video  {
 
         
     }
+    public static void deleteVideo(FileDeleted fileDeleted){
+
+        /** Example 1:  new item 
+        Video video = new Video();
+        repository().save(video);
+
+        */
+
+        /** Example 2:  finding and process
+        
+        repository().findById(fileDeleted.get???()).ifPresent(video->{
+            
+            video // do something
+            repository().save(video);
+
+
+         });
+        */
+
+        
+    }
 
 
 
